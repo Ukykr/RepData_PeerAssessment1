@@ -2,7 +2,8 @@
 
 
 
-```{r plotNumeric, echo=TRUE, fig.height=3}
+
+```r
 require(ggplot2)
 require(dplyr)
 require(data.table)
@@ -35,14 +36,38 @@ getdataset<-function()
         
 }
 getdataset()
+```
 
+```
+## [1] "."
+```
+
+```r
 df001<-df00%>%
         group_by(date)%>%
                 summarise(steps=sum(steps))
 hist(df001$steps,xlab="steps",main = "Number of steps taken per day")
-cat("mean of the total number of steps taken per day:",mean(df001$steps,na.rm = T));
-cat(" median of the total number of steps taken per day:",median(df001$steps,na.rm = T))
+```
 
+![plot of chunk plotNumeric](figure/plotNumeric-1.png)
+
+```r
+cat("mean of the total number of steps taken per day:",mean(df001$steps,na.rm = T));
+```
+
+```
+## mean of the total number of steps taken per day: 10766.19
+```
+
+```r
+cat(" median of the total number of steps taken per day:",median(df001$steps,na.rm = T))
+```
+
+```
+##  median of the total number of steps taken per day: 10765
+```
+
+```r
 missing<-df00%>%group_by(date)%>%summarise(mis= all(is.na(steps)))
 missingdays<-missing$date[missing$mis==TRUE]
 
@@ -65,9 +90,11 @@ df04<-df03%>%
                 summarise(steps=sum(steps))
 
 hist(df04$steps,xlab="steps",main = "Number of steps taken per day")
+```
 
+![plot of chunk plotNumeric](figure/plotNumeric-2.png)
 
-
+```r
 df05<-df02%>%
                 mutate(day=weekdays(date))%>%
                           mutate(day =as.factor( ifelse(day%in%c("Saturday","Sunday"), "weekend", "weekday")))
@@ -79,10 +106,16 @@ weekend<-df05%>%
 
 
 qplot(x=interval,y=steps,data=weekend,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "weekends")
+```
+
+![plot of chunk plotNumeric](figure/plotNumeric-3.png)
+
+```r
 weekday<-df05%>%
                 filter(day=="weekday")%>%
                         group_by(interval)%>%
                                 summarise(steps=mean(steps))
 qplot(x=interval,y=steps,data=weekday,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "weekdays")
-
 ```
+
+![plot of chunk plotNumeric](figure/plotNumeric-4.png)
