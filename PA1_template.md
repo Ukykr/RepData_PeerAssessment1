@@ -10,8 +10,6 @@ require(data.table)
 getdataset<-function()
 {
         dir<-utils::getSrcDirectory(function(x) {x})
-        print(dir)
-        setwd(dir)
         a<-list.files(path = dir)
         file0<-"activity.csv"
         if (!(file0%in%a))
@@ -36,13 +34,7 @@ getdataset<-function()
         
 }
 getdataset()
-```
 
-```
-## [1] "."
-```
-
-```r
 df001<-df00%>%
         group_by(date)%>%
                 summarise(steps=sum(steps))
@@ -68,6 +60,14 @@ cat(" median of the total number of steps taken per day:",median(df001$steps,na.
 ```
 
 ```r
+print("If a day has only missing values they are imputed with mean values across the dataset. The rest are imputed with mean for that day")
+```
+
+```
+## [1] "If a day has only missing values they are imputed with mean values across the dataset. The rest are imputed with mean for that day"
+```
+
+```r
 missing<-df00%>%group_by(date)%>%summarise(mis= all(is.na(steps)))
 missingdays<-missing$date[missing$mis==TRUE]
 
@@ -80,7 +80,24 @@ df02$steps[is.na(df02$steps)]<-mean(df01$steps,na.rm = T)
 
 df02<-bind_rows(df00%>%filter(!(date%in%missingdays)),df02)%>%
                 mutate(date=as.Date(date,format='%Y-%m-%d'))
+df002<-df02%>%
+        group_by(interval)%>%
+                summarise(meanstep=mean(steps))
 
+qplot(x=interval,y=meanstep,data=df002,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "mean number of steps")
+```
+
+![plot of chunk plotNumeric](figure/plotNumeric-2.png)
+
+```r
+cat("interval",df002$interval[df002$meanstep==max(df002$meanstep)],"on average across all the days in the dataset, contains the maximum number of steps")
+```
+
+```
+## interval 835 on average across all the days in the dataset, contains the maximum number of steps
+```
+
+```r
 df03<-df02%>%
         group_by(date)%>%
                 mutate(steps = ifelse(is.na(steps), median(steps, na.rm = T), steps))
@@ -92,7 +109,7 @@ df04<-df03%>%
 hist(df04$steps,xlab="steps",main = "Number of steps taken per day")
 ```
 
-![plot of chunk plotNumeric](figure/plotNumeric-2.png)
+![plot of chunk plotNumeric](figure/plotNumeric-3.png)
 
 ```r
 df05<-df02%>%
@@ -108,7 +125,7 @@ weekend<-df05%>%
 qplot(x=interval,y=steps,data=weekend,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "weekends")
 ```
 
-![plot of chunk plotNumeric](figure/plotNumeric-3.png)
+![plot of chunk plotNumeric](figure/plotNumeric-4.png)
 
 ```r
 weekday<-df05%>%
@@ -118,4 +135,4 @@ weekday<-df05%>%
 qplot(x=interval,y=steps,data=weekday,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "weekdays")
 ```
 
-![plot of chunk plotNumeric](figure/plotNumeric-4.png)
+![plot of chunk plotNumeric](figure/plotNumeric-5.png)

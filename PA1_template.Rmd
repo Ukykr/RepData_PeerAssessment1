@@ -9,8 +9,6 @@ require(data.table)
 getdataset<-function()
 {
         dir<-utils::getSrcDirectory(function(x) {x})
-        print(dir)
-        setwd(dir)
         a<-list.files(path = dir)
         file0<-"activity.csv"
         if (!(file0%in%a))
@@ -43,6 +41,8 @@ hist(df001$steps,xlab="steps",main = "Number of steps taken per day")
 cat("mean of the total number of steps taken per day:",mean(df001$steps,na.rm = T));
 cat(" median of the total number of steps taken per day:",median(df001$steps,na.rm = T))
 
+print("If a day has only missing values they are imputed with mean values across the dataset. The rest are imputed with mean for that day")
+
 missing<-df00%>%group_by(date)%>%summarise(mis= all(is.na(steps)))
 missingdays<-missing$date[missing$mis==TRUE]
 
@@ -55,6 +55,13 @@ df02$steps[is.na(df02$steps)]<-mean(df01$steps,na.rm = T)
 
 df02<-bind_rows(df00%>%filter(!(date%in%missingdays)),df02)%>%
                 mutate(date=as.Date(date,format='%Y-%m-%d'))
+df002<-df02%>%
+        group_by(interval)%>%
+                summarise(meanstep=mean(steps))
+
+qplot(x=interval,y=meanstep,data=df002,geom=c("line"),xlab="interval",ylab="number of steps")+labs(title = "mean number of steps")
+
+cat("interval",df002$interval[df002$meanstep==max(df002$meanstep)],"on average across all the days in the dataset, contains the maximum number of steps")
 
 df03<-df02%>%
         group_by(date)%>%
